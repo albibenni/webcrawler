@@ -1,5 +1,6 @@
 import { JSDOM } from 'jsdom'
-export const normalizeURL = (url) => {
+
+export const normalizedURL = (url) => {
     const urlObj = new URL(url);
     let endUrl = `${urlObj.host}${urlObj.pathname}`;
 
@@ -28,25 +29,63 @@ export const getURLsFromHTML = (htmlBody, baseURL) => {
     }
     return urls
 }
-
-export const crawlPage = async (url) => {
-
+ 
+async function fetchHTML(url) {
+    let res
     try {
-        const res = await fetch(url);
-        if (res.status >= 400 && res.status < 500) {
-            console.log("error: ", res.status);
-            return;
-        }
-        const contentType = res.headers.get("Content-Type");
-        if (!contentType || !contentType.includes("text/html")) {
-            console.log("Content-Type error ", contentType);
-            return;
-        }
-        console.log(await res.text());
-    } catch (error) {
-        console.log(error)
+      res = await fetch(url)
+    } catch (err) {
+      throw new Error(`Got Network error: ${err.message}`)
+    }
+  
+    if (res.status > 399) {
+      throw new Error(`Got HTTP error: ${res.status} ${res.statusText}`)
+    }
+  
+    const contentType = res.headers.get('content-type')
+    if (!contentType || !contentType.includes('text/html')) {
+      throw new Error(`Got non-HTML response: ${contentType}`)
+    }
+  
+    return res.text()
+  }
 
+export const crawlPage = async (baseURL, currentUrl = baseURL, pages = {}) => {
+    const currentUrlObj = new URL(currentUrl);
+    const baseURLObj = new URL(baseURL);
+    if (currentUrlObj.hostname !== baseURLObj.hostname) {
+        return pages;
     }
 
+    const normalizeURL = normalizedURL(currentUrl);
+
+    if (pages[normalizeURL] > 0) {
+        pages[normalizeURL]++;
+        return pages;
+    }
+
+    pages[normalizeURL] = 1;
+    let res = "";
+    try {
+        res = await fetchHTML(currentUrl);
+        //         if (res.status >= 400 && res.status < 500) {
+        //             console.log("error: ", res.status);
+        //             return;
+        //         }
+        //         const contentType = res.headers.get("Content-Type");
+        //         if (!contentType || !contentType.includes("text/html")) {
+        //             console.log("Content-Type error ", contentType);
+        //             return;
+        //         }
+        //         console.log(await res.text());
+    } catch (error) {
+        console.log(error.message)
+    }
+
+    const nextURLs = getURLsFromHTML(res, baseURL);
+    for (const nextUrl of nextURLs) {
+        pages = await crawlPage(baseURL, nextUrl, pages);
+    }
+    return pages
 }
 

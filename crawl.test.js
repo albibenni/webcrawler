@@ -1,34 +1,34 @@
 import {test, expect} from "@jest/globals";
-import { normalizeURL, getURLsFromHTML} from "./crawl";
+import { normalizedURL, getURLsFromHTML} from "./crawl";
 
 test("normalize http url", () => {
     const url = "http://mywebsite.com/path";
-    expect(normalizeURL(url)).toEqual("mywebsite.com/path");
+    expect(normalizedURL(url)).toEqual("mywebsite.com/path");
 });
 
 test("normalize https url", () => {
     const url = "https://mywebsite.com/path";
-    expect(normalizeURL(url)).toEqual("mywebsite.com/path");
+    expect(normalizedURL(url)).toEqual("mywebsite.com/path");
 });
 test("normalize http/ url", () => {
     const url = "http://mywebsite.com/path/";
-    expect(normalizeURL(url)).toEqual("mywebsite.com/path");
+    expect(normalizedURL(url)).toEqual("mywebsite.com/path");
 });
 test("normalize https/ url", () => {
     const url = "https://mywebsite.com/path/";
-    expect(normalizeURL(url)).toEqual("mywebsite.com/path");
+    expect(normalizedURL(url)).toEqual("mywebsite.com/path");
 });
 
-test('normalizeURL capitals', () => {
+test('normalizedURL capitals', () => {
   const input = 'https://MYWEBSITE.me.com/path'
-  const actual = normalizeURL(input)
+  const actual = normalizedURL(input)
   const expected = 'mywebsite.me.com/path'
   expect(actual).toEqual(expected)
 })
 
-test('normalizeURL http', () => {
+test('normalizedURL http', () => {
   const input = 'http://MYWEBSITE.me.com/path'
-  const actual = normalizeURL(input)
+  const actual = normalizedURL(input)
   const expected = 'mywebsite.me.com/path'
   expect(actual).toEqual(expected)
 })
