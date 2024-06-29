@@ -29,3 +29,24 @@ export const getURLsFromHTML = (htmlBody, baseURL) => {
     return urls
 }
 
+export const crawlPage = async (url) => {
+
+    try {
+        const res = await fetch(url);
+        if (res.status >= 400 && res.status < 500) {
+            console.log("error: ", res.status);
+            return;
+        }
+        const contentType = res.headers.get("Content-Type");
+        if (!contentType || !contentType.includes("text/html")) {
+            console.log("Content-Type error ", contentType);
+            return;
+        }
+        console.log(await res.text());
+    } catch (error) {
+        console.log(error)
+
+    }
+
+}
+
